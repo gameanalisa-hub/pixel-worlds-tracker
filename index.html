@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -85,17 +85,8 @@
     <section id="login">
       <h3>Login</h3>
 
-      <input
-        id="email"
-        type="email"
-        placeholder="Email Supabase"
-      >
-
-      <input
-        id="password"
-        type="password"
-        placeholder="Password Supabase"
-      >
+      <input id="email" type="email" placeholder="Email Supabase">
+      <input id="password" type="password" placeholder="Password Supabase">
 
       <button id="loginButton">Login</button>
     </section>
@@ -113,10 +104,7 @@
         Format: JPG, PNG, atau WEBP. Maksimal 4,8 MB.
       </p>
 
-      <button id="uploadButton">
-        Proses Screenshot
-      </button>
-
+      <button id="uploadButton">Proses Screenshot</button>
       <button id="logout">Logout</button>
     </section>
 
@@ -141,25 +129,18 @@
       SUPABASE_PUBLISHABLE_KEY
     );
 
-    // =====================================
-    // ELEMENTS
-    // =====================================
+    const BUCKET_NAME = "pixel-worlds-screenshots";
 
-    const loginSection =
-      document.getElementById("login");
-
-    const trackerSection =
-      document.getElementById("tracker");
-
-    const statusBox =
-      document.getElementById("status");
+    const loginSection = document.getElementById("login");
+    const trackerSection = document.getElementById("tracker");
+    const statusBox = document.getElementById("status");
 
     function showStatus(message) {
       statusBox.textContent = message;
     }
 
     // =====================================
-    // UPDATE LOGIN SCREEN
+    // LOGIN SCREEN
     // =====================================
 
     async function updateScreen() {
@@ -181,30 +162,23 @@
     // LOGIN
     // =====================================
 
-    document
-      .getElementById("loginButton")
+    document.getElementById("loginButton")
       .addEventListener("click", async () => {
 
-        const email =
-          document.getElementById("email").value.trim();
-
-        const password =
-          document.getElementById("password").value;
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
 
         if (!email || !password) {
-          showStatus(
-            "Masukkan email dan password terlebih dahulu."
-          );
+          showStatus("Masukkan email dan password terlebih dahulu.");
           return;
         }
 
         showStatus("Sedang login...");
 
-        const { error } =
-          await supabaseClient.auth.signInWithPassword({
-            email,
-            password
-          });
+        const { error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
 
         if (error) {
           showStatus("Login gagal: " + error.message);
@@ -212,7 +186,6 @@
         }
 
         showStatus("Login berhasil.");
-
         await updateScreen();
       });
 
@@ -220,12 +193,10 @@
     // LOGOUT
     // =====================================
 
-    document
-      .getElementById("logout")
+    document.getElementById("logout")
       .addEventListener("click", async () => {
 
-        const { error } =
-          await supabaseClient.auth.signOut();
+        const { error } = await supabaseClient.auth.signOut();
 
         if (error) {
           showStatus("Logout gagal: " + error.message);
@@ -233,50 +204,8 @@
         }
 
         showStatus("Kamu sudah logout.");
-
         await updateScreen();
       });
-
-    // =====================================
-    // READ ERROR DETAILS
-    // =====================================
-
-    async function getFunctionErrorDetails(error) {
-      let detail = error?.message || "Terjadi kesalahan.";
-
-      try {
-        const response = error?.context;
-
-        if (response && typeof response.clone === "function") {
-          const copy = response.clone();
-
-          let responseText = "";
-
-          try {
-            const result = await copy.json();
-
-            detail =
-              result.error ||
-              result.message ||
-              JSON.stringify(result);
-
-          } catch (_) {
-            responseText = await response.clone().text();
-
-            if (responseText) {
-              detail = responseText;
-            }
-          }
-        }
-      } catch (readError) {
-        console.error(
-          "Gagal membaca detail respons:",
-          readError
-        );
-      }
-
-      return detail;
-    }
 
     // =====================================
     // COMPRESS SCREENSHOT
@@ -297,15 +226,8 @@
 
         const canvas = document.createElement("canvas");
 
-        canvas.width = Math.max(
-          1,
-          Math.round(bitmap.width * scale)
-        );
-
-        canvas.height = Math.max(
-          1,
-          Math.round(bitmap.height * scale)
-        );
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
 
         const context = canvas.getContext("2d");
 
@@ -327,24 +249,11 @@
         return await new Promise((resolve, reject) => {
           canvas.toBlob((blob) => {
             if (!blob) {
-              reject(
-                new Error("Gagal mengompres gambar.")
-              );
+              reject(new Error("Gagal mengompres gambar."));
               return;
             }
 
-            const reader = new FileReader();
-
-            reader.onload = () => resolve(reader.result);
-
-            reader.onerror = () => {
-              reject(
-                new Error("Gagal membaca gambar.")
-              );
-            };
-
-            reader.readAsDataURL(blob);
-
+            resolve(blob);
           }, "image/jpeg", 0.75);
         });
 
@@ -359,20 +268,14 @@
     // UPLOAD SCREENSHOT
     // =====================================
 
-    document
-      .getElementById("uploadButton")
+    document.getElementById("uploadButton")
       .addEventListener("click", async () => {
 
-        const button =
-          document.getElementById("uploadButton");
-
-        const file =
-          document.getElementById("screenshot").files[0];
+        const button = document.getElementById("uploadButton");
+        const file = document.getElementById("screenshot").files[0];
 
         if (!file) {
-          showStatus(
-            "Pilih screenshot terlebih dahulu."
-          );
+          showStatus("Pilih screenshot terlebih dahulu.");
           return;
         }
 
@@ -383,61 +286,110 @@
         ];
 
         if (!allowedTypes.includes(file.type)) {
-          showStatus(
-            "Format gambar harus JPG, PNG, atau WEBP."
-          );
+          showStatus("Format gambar harus JPG, PNG, atau WEBP.");
           return;
         }
 
         if (file.size > 4.8 * 1024 * 1024) {
-          showStatus(
-            "Ukuran gambar terlalu besar. Maksimal 4,8 MB."
-          );
+          showStatus("Ukuran gambar terlalu besar. Maksimal 4,8 MB.");
           return;
         }
 
         button.disabled = true;
 
-        showStatus(
-          "Sedang memproses screenshot. Mohon tunggu..."
-        );
-
         try {
-          // Compress screenshot
-          const imageBase64 =
-            await compressImage(file);
+          // Pastikan pengguna sudah login
+          const {
+            data: { session },
+            error: sessionError
+          } = await supabaseClient.auth.getSession();
 
-          // Send screenshot to Supabase Edge Function
+          if (sessionError || !session) {
+            throw new Error("Sesi login berakhir. Silakan login kembali.");
+          }
+
+          // Kompres gambar menjadi JPG
+          showStatus("1/4 - Mengompres screenshot...");
+
+          const imageBlob = await compressImage(file);
+
+          // Buat lokasi file berdasarkan ID pengguna
+          const filePath =
+            session.user.id + "/" +
+            Date.now() + ".jpg";
+
+          // Upload ke Supabase Storage private bucket
+          showStatus("2/4 - Mengunggah screenshot ke Storage...");
+
+          const { error: uploadError } =
+            await supabaseClient.storage
+              .from(BUCKET_NAME)
+              .upload(filePath, imageBlob, {
+                contentType: "image/jpeg",
+                upsert: false
+              });
+
+          if (uploadError) {
+            throw new Error(
+              "Upload Storage gagal: " + uploadError.message
+            );
+          }
+
+          // Buat Signed URL selama 1 jam
+          showStatus("3/4 - Membuat Signed URL...");
+
+          const { data: signedData, error: signedError } =
+            await supabaseClient.storage
+              .from(BUCKET_NAME)
+              .createSignedUrl(filePath, 3600);
+
+          if (signedError || !signedData?.signedUrl) {
+            throw new Error(
+              "Gagal membuat Signed URL: " +
+              (signedError?.message || "URL tidak tersedia.")
+            );
+          }
+
+          // Kirim URL gambar ke Edge Function
+          showStatus("4/4 - Mengirim URL gambar ke Make...");
+
           const { data, error } =
             await supabaseClient.functions.invoke(
               "pixel-worlds-processor",
               {
                 body: {
-                  imageBase64: imageBase64,
+                  imageUrl: signedData.signedUrl,
                   mimeType: "image/jpeg",
-                  fileName: file.name
+                  fileName: file.name,
+                  storagePath: filePath
                 }
               }
             );
 
-          // Display detailed server error
           if (error) {
-            const detail =
-              await getFunctionErrorDetails(error);
+            let detail = error.message || "Terjadi kesalahan.";
+
+            try {
+              if (error.context?.clone) {
+                const response = await error.context.clone().json();
+                detail = response.error ||
+                         response.message ||
+                         JSON.stringify(response);
+              }
+            } catch (_) {}
 
             throw new Error(detail);
           }
 
           if (!data || !data.success) {
-            throw new Error(
-              data?.error || "Proses gagal."
-            );
+            throw new Error(data?.error || "Proses gagal.");
           }
 
           showStatus(
-            "SCREENSHOT BERHASIL DIPROSES!\n\n" +
-            JSON.stringify(data.data, null, 2) +
-            "\n\nStatus: Data berhasil dikirim ke Make."
+            "SCREENSHOT BERHASIL DIKIRIM!\n\n" +
+            "Nama file: " + file.name + "\n" +
+            "Lokasi Storage: " + filePath + "\n\n" +
+            "Status: " + (data.message || "Dikirim ke Make.")
           );
 
         } catch (error) {
