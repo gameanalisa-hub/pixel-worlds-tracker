@@ -79,7 +79,7 @@
     const SUPABASE_URL = "https://udsumovcwgqxfhbviosf.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_YwtD5_DNH8oPtp0bOgeXOA_9rIBw1oU";
 
-    const supabase = window.supabase.createClient(
+    const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_PUBLISHABLE_KEY
     );
@@ -93,7 +93,7 @@
     }
 
     async function updateScreen() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabaseClient.auth.getSession();
 
       loginSection.classList.toggle("hidden", !!session);
       trackerSection.classList.toggle("hidden", !session);
@@ -110,7 +110,7 @@
 
       showStatus("Sedang login...");
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabaseClient.auth.signInWithPassword({
         email,
         password
       });
@@ -125,7 +125,7 @@
     });
 
     document.getElementById("logout").addEventListener("click", async () => {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       showStatus("Kamu sudah logout.");
       await updateScreen();
     });
@@ -162,7 +162,7 @@
           reader.readAsDataURL(file);
         });
 
-        const { data, error } = await supabase.functions.invoke(
+        const { data, error } = await supabaseClient.functions.invoke(
           "pixel-worlds-processor",
           {
             body: {
