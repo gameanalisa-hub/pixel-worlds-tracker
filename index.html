@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -22,7 +22,7 @@
     }
 
     .container {
-      max-width: 480px;
+      max-width: 600px;
       margin: 30px auto;
       background: white;
       padding: 24px;
@@ -144,6 +144,129 @@
       margin-top: 20px;
       padding-top: 15px;
       border-top: 1px solid #e5e7eb;
+    }
+
+    /* TRANSACTION HISTORY */
+
+    .history-section {
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .history-filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .history-card {
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      border-radius: 9px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .history-item-name {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .history-category {
+      color: #666;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .history-badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .badge-add {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-remove {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-adjust {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .history-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .history-detail {
+      background: white;
+      padding: 9px;
+      border-radius: 7px;
+    }
+
+    .history-detail small {
+      display: block;
+      color: #666;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .history-detail strong {
+      font-size: 14px;
+    }
+
+    .history-date {
+      font-size: 11px;
+      color: #777;
+      margin-top: 10px;
+    }
+
+    .history-notes {
+      font-size: 12px;
+      color: #555;
+      margin-top: 8px;
+      overflow-wrap: anywhere;
+    }
+
+    #refreshHistory {
+      background: #475569;
+    }
+
+    #historyStatus {
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 420px) {
+      .container {
+        padding: 18px;
+      }
+
+      .history-filters {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -278,6 +401,45 @@
           <div id="inventoryStatus" role="status"></div>
 
         </div>
+
+      </section>
+
+      <!-- TRANSACTION HISTORY -->
+
+      <section class="history-section">
+
+        <h3>Transaction History</h3>
+
+        <p class="note">
+          Riwayat perubahan stok inventory.
+          Menampilkan maksimal 50 transaksi terbaru.
+        </p>
+
+        <div class="history-filters">
+
+          <select id="historyItemFilter">
+            <option value="">Semua Item</option>
+          </select>
+
+          <select id="historyTypeFilter">
+            <option value="">Semua Transaksi</option>
+            <option value="add">Add</option>
+            <option value="remove">Remove</option>
+            <option value="adjust">Adjust</option>
+          </select>
+
+        </div>
+
+        <button id="refreshHistory" type="button">
+          Refresh History
+        </button>
+
+        <div id="historyStatus" role="status">
+          Memuat riwayat transaksi...
+        </div>
+
+        <div id="historyList"></div>
+
       </section>
 
       <button id="logout">Logout</button>
@@ -329,6 +491,48 @@
       document.getElementById("inventoryStatus");
 
     // =====================================
+    // HISTORY ELEMENTS
+    // =====================================
+
+    const historyList =
+      document.getElementById("historyList");
+
+    const historyStatus =
+      document.getElementById("historyStatus");
+
+    const historyItemFilter =
+      document.getElementById("historyItemFilter");
+
+    const historyTypeFilter =
+      document.getElementById("historyTypeFilter");
+
+    // =====================================
+    // FORMAT HELPERS
+    // =====================================
+
+    function formatNumber(value) {
+      return Number(value).toLocaleString("id-ID");
+    }
+
+    function formatDate(value) {
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return "-";
+      }
+
+      return date.toLocaleString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+    }
+
+    // =====================================
     // LOAD INVENTORY
     // =====================================
 
@@ -373,6 +577,9 @@
       inventorySelect.innerHTML =
         '<option value="">Pilih item...</option>';
 
+      historyItemFilter.innerHTML =
+        '<option value="">Semua Item</option>';
+
       data.forEach((item) => {
 
         const name =
@@ -397,8 +604,7 @@
         const quantity = document.createElement("div");
         quantity.className = "inventory-quantity";
 
-        quantity.textContent =
-          Number(item.quantity).toLocaleString("id-ID");
+        quantity.textContent = formatNumber(item.quantity);
 
         card.append(details, quantity);
 
@@ -411,12 +617,289 @@
 
         inventorySelect.appendChild(option);
 
+        const filterOption =
+          document.createElement("option");
+
+        filterOption.value = item.item_id;
+        filterOption.textContent = name;
+
+        historyItemFilter.appendChild(filterOption);
+
       });
 
       if (data.length === 0) {
         inventoryList.textContent =
           "Inventory masih kosong.";
       }
+
+    }
+
+    // =====================================
+    // LOAD TRANSACTION HISTORY
+    // =====================================
+
+    async function loadTransactionHistory() {
+
+      historyList.innerHTML = "";
+      historyStatus.textContent =
+        "Memuat riwayat transaksi...";
+
+      const {
+        data: { session },
+        error: sessionError
+      } = await supabaseClient.auth.getSession();
+
+      if (sessionError || !session) {
+        historyStatus.textContent =
+          "Silakan login untuk melihat riwayat.";
+        return;
+      }
+
+      let query = supabaseClient
+        .from("inventory_transactions")
+        .select(`
+          transaction_id,
+          item_id,
+          transaction_type,
+          quantity,
+          balance_after,
+          notes,
+          created_at,
+          items (
+            name,
+            category
+          )
+        `)
+        .order("created_at", {
+          ascending: false
+        })
+        .limit(50);
+
+      const selectedItem =
+        historyItemFilter.value;
+
+      const selectedType =
+        historyTypeFilter.value;
+
+      if (selectedItem) {
+        query = query.eq("item_id", selectedItem);
+      }
+
+      if (selectedType) {
+        query = query.eq(
+          "transaction_type",
+          selectedType
+        );
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+
+        historyStatus.textContent =
+          "Gagal memuat riwayat transaksi:\n" +
+          error.message;
+
+        return;
+
+      }
+
+      historyList.innerHTML = "";
+
+      if (!data || data.length === 0) {
+
+        historyStatus.textContent =
+          "Belum ada transaksi yang sesuai filter.";
+
+        return;
+
+      }
+
+      historyStatus.textContent =
+        "Menampilkan " + data.length +
+        " transaksi terbaru.";
+
+      data.forEach((transaction) => {
+
+        const itemName =
+          transaction.items?.name ||
+          "Item tidak dikenal";
+
+        const category =
+          transaction.items?.category || "-";
+
+        const type =
+          transaction.transaction_type;
+
+        const quantity =
+          Number(transaction.quantity);
+
+        const balance =
+          Number(transaction.balance_after);
+
+        const card =
+          document.createElement("div");
+
+        card.className = "history-card";
+
+        // Header
+
+        const top =
+          document.createElement("div");
+
+        top.className = "history-top";
+
+        const itemDetails =
+          document.createElement("div");
+
+        const itemTitle =
+          document.createElement("div");
+
+        itemTitle.className = "history-item-name";
+        itemTitle.textContent = itemName;
+
+        const itemCategory =
+          document.createElement("div");
+
+        itemCategory.className = "history-category";
+        itemCategory.textContent = category;
+
+        itemDetails.append(
+          itemTitle,
+          itemCategory
+        );
+
+        const badge =
+          document.createElement("span");
+
+        badge.className = "history-badge";
+
+        if (type === "add") {
+
+          badge.classList.add("badge-add");
+          badge.textContent = "ADD";
+
+        } else if (type === "remove") {
+
+          badge.classList.add("badge-remove");
+          badge.textContent = "REMOVE";
+
+        } else {
+
+          badge.classList.add("badge-adjust");
+          badge.textContent = "ADJUST";
+
+        }
+
+        top.append(itemDetails, badge);
+
+        // Transaction details
+
+        const details =
+          document.createElement("div");
+
+        details.className = "history-details";
+
+        const changeBox =
+          document.createElement("div");
+
+        changeBox.className = "history-detail";
+
+        const changeLabel =
+          document.createElement("small");
+
+        changeLabel.textContent =
+          type === "adjust"
+            ? "Selisih koreksi"
+            : "Perubahan stok";
+
+        const changeValue =
+          document.createElement("strong");
+
+        if (type === "add") {
+
+          changeValue.textContent =
+            "+" + formatNumber(quantity);
+
+        } else if (type === "remove") {
+
+          changeValue.textContent =
+            "-" + formatNumber(quantity);
+
+        } else {
+
+          changeValue.textContent =
+            "±" + formatNumber(quantity);
+
+        }
+
+        changeBox.append(
+          changeLabel,
+          changeValue
+        );
+
+        const balanceBox =
+          document.createElement("div");
+
+        balanceBox.className = "history-detail";
+
+        const balanceLabel =
+          document.createElement("small");
+
+        balanceLabel.textContent =
+          "Saldo akhir";
+
+        const balanceValue =
+          document.createElement("strong");
+
+        balanceValue.textContent =
+          formatNumber(balance);
+
+        balanceBox.append(
+          balanceLabel,
+          balanceValue
+        );
+
+        details.append(
+          changeBox,
+          balanceBox
+        );
+
+        // Date
+
+        const date =
+          document.createElement("div");
+
+        date.className = "history-date";
+
+        date.textContent =
+          formatDate(transaction.created_at);
+
+        // Notes
+
+        card.append(
+          top,
+          details,
+          date
+        );
+
+        if (transaction.notes) {
+
+          const notes =
+            document.createElement("div");
+
+          notes.className = "history-notes";
+
+          notes.textContent =
+            "Catatan: " + transaction.notes;
+
+          card.appendChild(notes);
+
+        }
+
+        historyList.appendChild(card);
+
+      });
 
     }
 
@@ -449,7 +932,10 @@
       );
 
       if (session) {
+
         await loadInventory();
+        await loadTransactionHistory();
+
       }
 
     }
@@ -778,6 +1264,30 @@
       .addEventListener("click", loadInventory);
 
     // =====================================
+    // REFRESH HISTORY
+    // =====================================
+
+    document.getElementById("refreshHistory")
+      .addEventListener(
+        "click",
+        loadTransactionHistory
+      );
+
+    // =====================================
+    // HISTORY FILTERS
+    // =====================================
+
+    historyItemFilter.addEventListener(
+      "change",
+      loadTransactionHistory
+    );
+
+    historyTypeFilter.addEventListener(
+      "change",
+      loadTransactionHistory
+    );
+
+    // =====================================
     // SAVE INVENTORY TRANSACTION
     // =====================================
 
@@ -864,14 +1374,11 @@
           inventoryStatus.textContent =
             "TRANSAKSI BERHASIL!\n\n" +
             "Stok sebelumnya: " +
-            Number(data.previous_quantity)
-              .toLocaleString("id-ID") +
+            formatNumber(data.previous_quantity) +
             "\nPerubahan: " +
-            Number(data.change)
-              .toLocaleString("id-ID") +
+            formatNumber(data.change) +
             "\nStok sekarang: " +
-            Number(data.new_quantity)
-              .toLocaleString("id-ID");
+            formatNumber(data.new_quantity);
 
           document.getElementById(
             "transactionQuantity"
@@ -882,6 +1389,7 @@
           ).value = "";
 
           await loadInventory();
+          await loadTransactionHistory();
 
         } catch (error) {
 
@@ -911,3 +1419,4 @@
   </script>
 </body>
 </html>
+```
