@@ -259,6 +259,83 @@
       margin-top: 10px;
     }
 
+    /* THANKSGIVING EVENT PROGRESS */
+
+    .event-section {
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .event-card {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 12px;
+    }
+
+    .event-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .event-stat {
+      background: white;
+      padding: 12px 6px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+      min-width: 0;
+    }
+
+    .event-stat small {
+      display: block;
+      color: #666;
+      font-size: 11px;
+    }
+
+    .event-stat strong {
+      display: block;
+      font-size: 19px;
+      margin-top: 5px;
+      overflow-wrap: anywhere;
+    }
+
+    .event-progress-track {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .event-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #16a34a;
+      transition: width .3s ease;
+    }
+
+    .event-progress-text {
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 1.5;
+    }
+
+    #saveEventTarget {
+      background: #15803d;
+    }
+
+    #eventStatus {
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+
     @media (max-width: 420px) {
       .container {
         padding: 18px;
@@ -266,6 +343,14 @@
 
       .history-filters {
         grid-template-columns: 1fr;
+      }
+
+      .event-stats {
+        gap: 5px;
+      }
+
+      .event-stat strong {
+        font-size: 16px;
       }
     }
   </style>
@@ -442,6 +527,82 @@
 
       </section>
 
+      <!-- THANKSGIVING EVENT PROGRESS -->
+
+      <section class="event-section">
+
+        <h3>Thanksgiving Event Progress</h3>
+
+        <p class="note">
+          Pantau perkembangan farming menuju Pilgrim Hat.
+          Data stok dibaca langsung dari Inventory Management.
+        </p>
+
+        <div class="event-card">
+
+          <div class="event-stats">
+
+            <div class="event-stat">
+              <small>Corn</small>
+              <strong id="eventCorn">0</strong>
+            </div>
+
+            <div class="event-stat">
+              <small>Turkey</small>
+              <strong id="eventTurkey">0</strong>
+            </div>
+
+            <div class="event-stat">
+              <small>Pilgrim Hat</small>
+              <strong id="eventHat">0</strong>
+            </div>
+
+          </div>
+
+          <label for="eventTurkeyTarget">
+            Target Turkey
+          </label>
+
+          <input
+            id="eventTurkeyTarget"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Masukkan target Turkey"
+          >
+
+          <button
+            id="saveEventTarget"
+            type="button"
+          >
+            Simpan Target
+          </button>
+
+          <h4>Progress Pilgrim Hat</h4>
+
+          <div class="event-progress-track">
+            <div
+              id="eventProgressFill"
+              class="event-progress-fill"
+            ></div>
+          </div>
+
+          <div
+            id="eventProgressText"
+            class="event-progress-text"
+          >
+            Target belum ditentukan.
+          </div>
+
+          <div
+            id="eventStatus"
+            role="status"
+          ></div>
+
+        </div>
+
+      </section>
+
       <button id="logout">Logout</button>
 
     </section>
@@ -507,6 +668,31 @@
       document.getElementById("historyTypeFilter");
 
     // =====================================
+    // EVENT PROGRESS ELEMENTS
+    // =====================================
+
+    const eventTargetInput =
+      document.getElementById("eventTurkeyTarget");
+
+    const eventStatus =
+      document.getElementById("eventStatus");
+
+    const eventProgressText =
+      document.getElementById("eventProgressText");
+
+    const eventProgressFill =
+      document.getElementById("eventProgressFill");
+
+    const EVENT_TARGET_KEY =
+      "pwpms_thanksgiving_turkey_target";
+
+    let eventInventory = {
+      corn: 0,
+      turkey: 0,
+      hat: 0
+    };
+
+    // =====================================
     // FORMAT HELPERS
     // =====================================
 
@@ -533,6 +719,172 @@
     }
 
     // =====================================
+    // EVENT PROGRESS CALCULATION
+    // =====================================
+
+    function updateEventProgress() {
+
+      document.getElementById("eventCorn").textContent =
+        formatNumber(eventInventory.corn);
+
+      document.getElementById("eventTurkey").textContent =
+        formatNumber(eventInventory.turkey);
+
+      document.getElementById("eventHat").textContent =
+        formatNumber(eventInventory.hat);
+
+      const target = Number(eventTargetInput.value);
+
+      // Jika Pilgrim Hat sudah dimiliki
+
+      if (eventInventory.hat > 0) {
+
+        eventProgressFill.style.width = "100%";
+
+        eventProgressText.textContent =
+          "Pilgrim Hat sudah dimiliki!";
+
+        return;
+
+      }
+
+      // Target belum ditentukan
+
+      if (
+        eventTargetInput.value.trim() === "" ||
+        !Number.isSafeInteger(target) ||
+        target <= 0
+      ) {
+
+        eventProgressFill.style.width = "0%";
+
+        eventProgressText.textContent =
+          "Target belum ditentukan.";
+
+        return;
+
+      }
+
+      // Hitung progres
+
+      const percentage = Math.min(
+        100,
+        (
+          eventInventory.turkey /
+          target
+        ) * 100
+      );
+
+      const remaining = Math.max(
+        0,
+        target - eventInventory.turkey
+      );
+
+      eventProgressFill.style.width =
+        percentage + "%";
+
+      if (remaining === 0) {
+
+        eventProgressText.textContent =
+          "Target Turkey tercapai! Pastikan jumlah ini sesuai kebutuhan penukaran Pilgrim Hat.";
+
+      } else {
+
+        eventProgressText.textContent =
+          percentage.toFixed(1) +
+          "% tercapai — " +
+          formatNumber(remaining) +
+          " Turkey lagi.";
+
+      }
+
+    }
+
+    // =====================================
+    // SAVE EVENT TARGET
+    // =====================================
+
+    document.getElementById("saveEventTarget")
+      .addEventListener("click", () => {
+
+        const targetValue =
+          eventTargetInput.value.trim();
+
+        const target = Number(targetValue);
+
+        if (
+          targetValue === "" ||
+          !Number.isSafeInteger(target) ||
+          target <= 0
+        ) {
+
+          eventStatus.textContent =
+            "Target harus berupa bilangan bulat lebih dari 0.";
+
+          return;
+
+        }
+
+        try {
+
+          localStorage.setItem(
+            EVENT_TARGET_KEY,
+            String(target)
+          );
+
+          eventStatus.textContent =
+            "Target Turkey berhasil disimpan.";
+
+          updateEventProgress();
+
+        } catch (error) {
+
+          eventStatus.textContent =
+            "Gagal menyimpan target di browser: " +
+            error.message;
+
+        }
+
+      });
+
+    // =====================================
+    // LOAD SAVED EVENT TARGET
+    // =====================================
+
+    function loadSavedEventTarget() {
+
+      try {
+
+        const savedTarget =
+          localStorage.getItem(EVENT_TARGET_KEY);
+
+        if (savedTarget !== null) {
+
+          const target = Number(savedTarget);
+
+          if (
+            Number.isSafeInteger(target) &&
+            target > 0
+          ) {
+
+            eventTargetInput.value = savedTarget;
+
+          }
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Gagal membaca target event:",
+          error
+        );
+
+      }
+
+    }
+
+    // =====================================
     // LOAD INVENTORY
     // =====================================
 
@@ -547,9 +899,12 @@
       } = await supabaseClient.auth.getSession();
 
       if (sessionError || !session) {
+
         inventoryList.textContent =
           "Silakan login untuk melihat inventory.";
+
         return;
+
       }
 
       const { data, error } = await supabaseClient
@@ -565,11 +920,14 @@
         .order("item_id");
 
       if (error) {
+
         inventoryList.textContent =
           "Gagal memuat inventory.";
 
         inventoryStatus.textContent = error.message;
+
         return;
+
       }
 
       inventoryList.innerHTML = "";
@@ -580,6 +938,14 @@
       historyItemFilter.innerHTML =
         '<option value="">Semua Item</option>';
 
+      // Reset stok event sebelum membaca data terbaru
+
+      eventInventory = {
+        corn: 0,
+        turkey: 0,
+        hat: 0
+      };
+
       data.forEach((item) => {
 
         const name =
@@ -588,39 +954,80 @@
         const category =
           item.items?.category || "-";
 
+        const normalizedName =
+          name.trim().toLowerCase();
+
+        const quantity =
+          Number(item.quantity);
+
+        // Hubungkan inventory dengan Event Progress
+
+        if (normalizedName === "corn") {
+
+          eventInventory.corn = quantity;
+
+        }
+
+        if (normalizedName === "turkey") {
+
+          eventInventory.turkey = quantity;
+
+        }
+
+        if (normalizedName === "pilgrim hat") {
+
+          eventInventory.hat = quantity;
+
+        }
+
+        // Inventory card
+
         const card = document.createElement("div");
+
         card.className = "inventory-item";
 
         const details = document.createElement("div");
 
         const title = document.createElement("strong");
+
         title.textContent = name;
 
         const subtitle = document.createElement("small");
+
         subtitle.textContent = category;
 
         details.append(title, subtitle);
 
-        const quantity = document.createElement("div");
-        quantity.className = "inventory-quantity";
+        const quantityElement =
+          document.createElement("div");
 
-        quantity.textContent = formatNumber(item.quantity);
+        quantityElement.className =
+          "inventory-quantity";
 
-        card.append(details, quantity);
+        quantityElement.textContent =
+          formatNumber(quantity);
+
+        card.append(details, quantityElement);
 
         inventoryList.appendChild(card);
+
+        // Transaction item selector
 
         const option = document.createElement("option");
 
         option.value = item.item_id;
+
         option.textContent = name;
 
         inventorySelect.appendChild(option);
+
+        // History item filter
 
         const filterOption =
           document.createElement("option");
 
         filterOption.value = item.item_id;
+
         filterOption.textContent = name;
 
         historyItemFilter.appendChild(filterOption);
@@ -628,9 +1035,15 @@
       });
 
       if (data.length === 0) {
+
         inventoryList.textContent =
           "Inventory masih kosong.";
+
       }
+
+      // Perbarui Event Progress setelah inventory dimuat
+
+      updateEventProgress();
 
     }
 
@@ -641,6 +1054,7 @@
     async function loadTransactionHistory() {
 
       historyList.innerHTML = "";
+
       historyStatus.textContent =
         "Memuat riwayat transaksi...";
 
@@ -650,9 +1064,12 @@
       } = await supabaseClient.auth.getSession();
 
       if (sessionError || !session) {
+
         historyStatus.textContent =
           "Silakan login untuk melihat riwayat.";
+
         return;
+
       }
 
       let query = supabaseClient
@@ -682,14 +1099,21 @@
         historyTypeFilter.value;
 
       if (selectedItem) {
-        query = query.eq("item_id", selectedItem);
+
+        query = query.eq(
+          "item_id",
+          selectedItem
+        );
+
       }
 
       if (selectedType) {
+
         query = query.eq(
           "transaction_type",
           selectedType
         );
+
       }
 
       const { data, error } = await query;
@@ -756,12 +1180,14 @@
           document.createElement("div");
 
         itemTitle.className = "history-item-name";
+
         itemTitle.textContent = itemName;
 
         const itemCategory =
           document.createElement("div");
 
         itemCategory.className = "history-category";
+
         itemCategory.textContent = category;
 
         itemDetails.append(
@@ -777,16 +1203,19 @@
         if (type === "add") {
 
           badge.classList.add("badge-add");
+
           badge.textContent = "ADD";
 
         } else if (type === "remove") {
 
           badge.classList.add("badge-remove");
+
           badge.textContent = "REMOVE";
 
         } else {
 
           badge.classList.add("badge-adjust");
+
           badge.textContent = "ADJUST";
 
         }
@@ -915,10 +1344,13 @@
       } = await supabaseClient.auth.getSession();
 
       if (error) {
+
         showStatus(
           "Gagal memeriksa login: " + error.message
         );
+
         return;
+
       }
 
       loginSection.classList.toggle(
@@ -934,6 +1366,7 @@
       if (session) {
 
         await loadInventory();
+
         await loadTransactionHistory();
 
       }
@@ -954,10 +1387,13 @@
           document.getElementById("password").value;
 
         if (!email || !password) {
+
           showStatus(
             "Masukkan email dan password terlebih dahulu."
           );
+
           return;
+
         }
 
         showStatus("Sedang login...");
@@ -969,8 +1405,13 @@
           });
 
         if (error) {
-          showStatus("Login gagal: " + error.message);
+
+          showStatus(
+            "Login gagal: " + error.message
+          );
+
           return;
+
         }
 
         showStatus("Login berhasil.");
@@ -990,8 +1431,13 @@
           await supabaseClient.auth.signOut();
 
         if (error) {
-          showStatus("Logout gagal: " + error.message);
+
+          showStatus(
+            "Logout gagal: " + error.message
+          );
+
           return;
+
         }
 
         showStatus("Kamu sudah logout.");
@@ -1037,9 +1483,11 @@
         const context = canvas.getContext("2d");
 
         if (!context) {
+
           throw new Error(
             "Gagal memproses gambar."
           );
+
         }
 
         context.drawImage(
@@ -1051,6 +1499,7 @@
         );
 
         bitmap.close();
+
         bitmap = null;
 
         return await new Promise((resolve, reject) => {
@@ -1058,10 +1507,13 @@
           canvas.toBlob((blob) => {
 
             if (!blob) {
+
               reject(
                 new Error("Gagal mengompres gambar.")
               );
+
               return;
+
             }
 
             resolve(blob);
@@ -1073,7 +1525,9 @@
       } finally {
 
         if (bitmap) {
+
           bitmap.close();
+
         }
 
       }
@@ -1094,10 +1548,13 @@
           document.getElementById("screenshot").files[0];
 
         if (!file) {
+
           showStatus(
             "Pilih screenshot terlebih dahulu."
           );
+
           return;
+
         }
 
         const allowedTypes = [
@@ -1107,17 +1564,23 @@
         ];
 
         if (!allowedTypes.includes(file.type)) {
+
           showStatus(
             "Format gambar harus JPG, PNG, atau WEBP."
           );
+
           return;
+
         }
 
         if (file.size > 4.8 * 1024 * 1024) {
+
           showStatus(
             "Ukuran gambar terlalu besar. Maksimal 4,8 MB."
           );
+
           return;
+
         }
 
         button.disabled = true;
@@ -1130,16 +1593,19 @@
           } = await supabaseClient.auth.getSession();
 
           if (sessionError || !session) {
+
             throw new Error(
               "Sesi login berakhir. Silakan login kembali."
             );
+
           }
 
           showStatus(
             "1/4 - Mengompres screenshot..."
           );
 
-          const imageBlob = await compressImage(file);
+          const imageBlob =
+            await compressImage(file);
 
           const filePath =
             session.user.id + "/" +
@@ -1158,10 +1624,12 @@
               });
 
           if (uploadError) {
+
             throw new Error(
               "Upload Storage gagal: " +
               uploadError.message
             );
+
           }
 
           showStatus(
@@ -1176,11 +1644,13 @@
             .createSignedUrl(filePath, 3600);
 
           if (signedError || !signedData?.signedUrl) {
+
             throw new Error(
               "Gagal membuat Signed URL: " +
               (signedError?.message ||
                "URL tidak tersedia.")
             );
+
           }
 
           showStatus(
@@ -1226,9 +1696,11 @@
           }
 
           if (!data || !data.success) {
+
             throw new Error(
               data?.error || "Proses gagal."
             );
+
           }
 
           showStatus(
@@ -1261,7 +1733,11 @@
     // =====================================
 
     document.getElementById("refreshInventory")
-      .addEventListener("click", loadInventory);
+      .addEventListener("click", async () => {
+
+        await loadInventory();
+
+      });
 
     // =====================================
     // REFRESH HISTORY
@@ -1310,15 +1786,21 @@
             .value.trim();
 
         if (!itemId) {
+
           inventoryStatus.textContent =
             "Pilih item terlebih dahulu.";
+
           return;
+
         }
 
         if (quantityInput === "") {
+
           inventoryStatus.textContent =
             "Masukkan jumlah transaksi.";
+
           return;
+
         }
 
         const quantity = Number(quantityInput);
@@ -1327,18 +1809,24 @@
           !Number.isSafeInteger(quantity) ||
           quantity < 0
         ) {
+
           inventoryStatus.textContent =
             "Jumlah harus berupa bilangan bulat yang valid.";
+
           return;
+
         }
 
         if (
           (type === "add" || type === "remove") &&
           quantity === 0
         ) {
+
           inventoryStatus.textContent =
             "Jumlah Add dan Remove harus lebih dari 0.";
+
           return;
+
         }
 
         const confirmed = confirm(
@@ -1346,7 +1834,9 @@
         );
 
         if (!confirmed) {
+
           return;
+
         }
 
         button.disabled = true;
@@ -1368,7 +1858,9 @@
             );
 
           if (error) {
+
             throw error;
+
           }
 
           inventoryStatus.textContent =
@@ -1388,7 +1880,12 @@
             "transactionNotes"
           ).value = "";
 
+          // Refresh inventory dan event progress
+
           await loadInventory();
+
+          // Refresh transaction history
+
           await loadTransactionHistory();
 
         } catch (error) {
@@ -1413,6 +1910,10 @@
     // =====================================
     // INITIALIZE
     // =====================================
+
+    loadSavedEventTarget();
+
+    updateEventProgress();
 
     updateScreen();
 
