@@ -9,9 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: Arial, sans-serif;
@@ -30,13 +28,8 @@
       box-shadow: 0 3px 15px #0001;
     }
 
-    h2 {
-      text-align: center;
-    }
-
-    h3 {
-      margin-top: 20px;
-    }
+    h2 { text-align: center; }
+    h3 { margin-top: 20px; }
 
     input, button, select {
       box-sizing: border-box;
@@ -65,9 +58,7 @@
       cursor: wait;
     }
 
-    #logout {
-      background: #555;
-    }
+    #logout { background: #555; }
 
     #status {
       white-space: pre-wrap;
@@ -77,9 +68,7 @@
       font-size: 14px;
     }
 
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
 
     .note {
       color: #666;
@@ -87,9 +76,9 @@
       line-height: 1.5;
     }
 
-    /* INVENTORY MANAGEMENT */
-
-    .inventory-section {
+    .inventory-section,
+    .history-section,
+    .event-section {
       margin-top: 25px;
       padding-top: 18px;
       border-top: 1px solid #e5e7eb;
@@ -128,11 +117,13 @@
       text-align: right;
     }
 
-    #refreshInventory {
+    #refreshInventory,
+    #refreshHistory {
       background: #475569;
     }
 
-    #inventoryStatus {
+    #inventoryStatus,
+    #historyStatus {
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       font-size: 13px;
@@ -143,14 +134,6 @@
     .inventory-form {
       margin-top: 20px;
       padding-top: 15px;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    /* TRANSACTION HISTORY */
-
-    .history-section {
-      margin-top: 25px;
-      padding-top: 18px;
       border-top: 1px solid #e5e7eb;
     }
 
@@ -231,9 +214,7 @@
       margin-bottom: 4px;
     }
 
-    .history-detail strong {
-      font-size: 14px;
-    }
+    .history-detail strong { font-size: 14px; }
 
     .history-date {
       font-size: 11px;
@@ -248,25 +229,6 @@
       overflow-wrap: anywhere;
     }
 
-    #refreshHistory {
-      background: #475569;
-    }
-
-    #historyStatus {
-      font-size: 13px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      margin-top: 10px;
-    }
-
-    /* THANKSGIVING EVENT PROGRESS */
-
-    .event-section {
-      margin-top: 25px;
-      padding-top: 18px;
-      border-top: 1px solid #e5e7eb;
-    }
-
     .event-card {
       background: #f8fafc;
       border: 1px solid #e5e7eb;
@@ -277,7 +239,7 @@
 
     .event-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 8px;
       margin: 15px 0;
     }
@@ -294,7 +256,7 @@
     .event-stat small {
       display: block;
       color: #666;
-      font-size: 11px;
+      font-size: 12px;
     }
 
     .event-stat strong {
@@ -325,9 +287,7 @@
       line-height: 1.5;
     }
 
-    #saveEventTarget {
-      background: #15803d;
-    }
+    #saveEventTarget { background: #15803d; }
 
     #eventStatus {
       font-size: 13px;
@@ -337,21 +297,9 @@
     }
 
     @media (max-width: 420px) {
-      .container {
-        padding: 18px;
-      }
-
-      .history-filters {
-        grid-template-columns: 1fr;
-      }
-
-      .event-stats {
-        gap: 5px;
-      }
-
-      .event-stat strong {
-        font-size: 16px;
-      }
+      .container { padding: 18px; }
+      .history-filters { grid-template-columns: 1fr; }
+      .event-stat strong { font-size: 16px; }
     }
   </style>
 </head>
@@ -370,19 +318,8 @@
 
     <section id="login">
       <h3>Login</h3>
-
-      <input
-        id="email"
-        type="email"
-        placeholder="Email Supabase"
-      >
-
-      <input
-        id="password"
-        type="password"
-        placeholder="Password Supabase"
-      >
-
+      <input id="email" type="email" placeholder="Email Supabase">
+      <input id="password" type="password" placeholder="Password Supabase">
       <button id="loginButton">Login</button>
     </section>
 
@@ -390,7 +327,7 @@
 
     <section id="tracker" class="hidden">
 
-      <!-- SCREENSHOT UPLOAD -->
+      <!-- SCREENSHOT TRACKER -->
 
       <h3>Screenshot Tracker</h3>
 
@@ -401,13 +338,10 @@
       >
 
       <p class="note">
-        Format: JPG, PNG, atau WEBP.
-        Maksimal 4,8 MB.
+        Format: JPG, PNG, atau WEBP. Maksimal 4,8 MB.
       </p>
 
-      <button id="uploadButton">
-        Proses Screenshot
-      </button>
+      <button id="uploadButton">Proses Screenshot</button>
 
       <!-- INVENTORY MANAGEMENT -->
 
@@ -427,23 +361,17 @@
           Refresh Inventory
         </button>
 
-        <!-- TRANSACTION FORM -->
-
         <div class="inventory-form">
 
           <h4>Transaksi Inventory</h4>
 
-          <label for="inventoryItem">
-            Pilih Item
-          </label>
+          <label for="inventoryItem">Pilih Item</label>
 
           <select id="inventoryItem">
             <option value="">Memuat item...</option>
           </select>
 
-          <label for="transactionType">
-            Jenis Transaksi
-          </label>
+          <label for="transactionType">Jenis Transaksi</label>
 
           <select id="transactionType">
             <option value="add">Add - Tambah Stok</option>
@@ -451,9 +379,7 @@
             <option value="adjust">Adjust - Koreksi Stok</option>
           </select>
 
-          <label for="transactionQuantity">
-            Jumlah
-          </label>
+          <label for="transactionQuantity">Jumlah</label>
 
           <input
             id="transactionQuantity"
@@ -464,13 +390,10 @@
           >
 
           <p class="note">
-            Untuk Adjust, masukkan jumlah stok akhir
-            yang ingin ditetapkan.
+            Untuk Adjust, masukkan jumlah stok akhir yang ingin ditetapkan.
           </p>
 
-          <label for="transactionNotes">
-            Catatan (opsional)
-          </label>
+          <label for="transactionNotes">Catatan (opsional)</label>
 
           <input
             id="transactionNotes"
@@ -486,7 +409,6 @@
           <div id="inventoryStatus" role="status"></div>
 
         </div>
-
       </section>
 
       <!-- TRANSACTION HISTORY -->
@@ -496,8 +418,7 @@
         <h3>Transaction History</h3>
 
         <p class="note">
-          Riwayat perubahan stok inventory.
-          Menampilkan maksimal 50 transaksi terbaru.
+          Riwayat perubahan stok inventory. Menampilkan maksimal 50 transaksi terbaru.
         </p>
 
         <div class="history-filters">
@@ -534,13 +455,17 @@
         <h3>Thanksgiving Event Progress</h3>
 
         <p class="note">
-          Pantau perkembangan farming menuju Pilgrim Hat.
-          Data stok dibaca langsung dari Inventory Management.
+          Progres event mengikuti stok inventory dari Supabase.
         </p>
 
         <div class="event-card">
 
           <div class="event-stats">
+
+            <div class="event-stat">
+              <small>Corn Block</small>
+              <strong id="eventCornBlock">0</strong>
+            </div>
 
             <div class="event-stat">
               <small>Corn</small>
@@ -559,9 +484,7 @@
 
           </div>
 
-          <label for="eventTurkeyTarget">
-            Target Turkey
-          </label>
+          <label for="eventTurkeyTarget">Target Turkey</label>
 
           <input
             id="eventTurkeyTarget"
@@ -571,14 +494,11 @@
             placeholder="Masukkan target Turkey"
           >
 
-          <button
-            id="saveEventTarget"
-            type="button"
-          >
+          <button id="saveEventTarget" type="button">
             Simpan Target
           </button>
 
-          <h4>Progress Pilgrim Hat</h4>
+          <h4>Progress Turkey</h4>
 
           <div class="event-progress-track">
             <div
@@ -587,20 +507,13 @@
             ></div>
           </div>
 
-          <div
-            id="eventProgressText"
-            class="event-progress-text"
-          >
+          <div id="eventProgressText" class="event-progress-text">
             Target belum ditentukan.
           </div>
 
-          <div
-            id="eventStatus"
-            role="status"
-          ></div>
+          <div id="eventStatus" role="status"></div>
 
         </div>
-
       </section>
 
       <button id="logout">Logout</button>
@@ -612,7 +525,6 @@
   </div>
 
   <script>
-
     // =====================================
     // SUPABASE CONFIGURATION
     // =====================================
@@ -687,6 +599,7 @@
       "pwpms_thanksgiving_turkey_target";
 
     let eventInventory = {
+      cornBlock: 0,
       corn: 0,
       turkey: 0,
       hat: 0
@@ -701,7 +614,6 @@
     }
 
     function formatDate(value) {
-
       const date = new Date(value);
 
       if (Number.isNaN(date.getTime())) {
@@ -715,7 +627,6 @@
         hour: "2-digit",
         minute: "2-digit"
       });
-
     }
 
     // =====================================
@@ -723,6 +634,9 @@
     // =====================================
 
     function updateEventProgress() {
+
+      document.getElementById("eventCornBlock").textContent =
+        formatNumber(eventInventory.cornBlock);
 
       document.getElementById("eventCorn").textContent =
         formatNumber(eventInventory.corn);
@@ -735,8 +649,6 @@
 
       const target = Number(eventTargetInput.value);
 
-      // Jika Pilgrim Hat sudah dimiliki
-
       if (eventInventory.hat > 0) {
 
         eventProgressFill.style.width = "100%";
@@ -745,10 +657,7 @@
           "Pilgrim Hat sudah dimiliki!";
 
         return;
-
       }
-
-      // Target belum ditentukan
 
       if (
         eventTargetInput.value.trim() === "" ||
@@ -762,17 +671,11 @@
           "Target belum ditentukan.";
 
         return;
-
       }
-
-      // Hitung progres
 
       const percentage = Math.min(
         100,
-        (
-          eventInventory.turkey /
-          target
-        ) * 100
+        (eventInventory.turkey / target) * 100
       );
 
       const remaining = Math.max(
@@ -780,8 +683,7 @@
         target - eventInventory.turkey
       );
 
-      eventProgressFill.style.width =
-        percentage + "%";
+      eventProgressFill.style.width = percentage + "%";
 
       if (remaining === 0) {
 
@@ -795,9 +697,7 @@
           "% tercapai — " +
           formatNumber(remaining) +
           " Turkey lagi.";
-
       }
-
     }
 
     // =====================================
@@ -807,9 +707,7 @@
     document.getElementById("saveEventTarget")
       .addEventListener("click", () => {
 
-        const targetValue =
-          eventTargetInput.value.trim();
-
+        const targetValue = eventTargetInput.value.trim();
         const target = Number(targetValue);
 
         if (
@@ -822,7 +720,6 @@
             "Target harus berupa bilangan bulat lebih dari 0.";
 
           return;
-
         }
 
         try {
@@ -842,9 +739,7 @@
           eventStatus.textContent =
             "Gagal menyimpan target di browser: " +
             error.message;
-
         }
-
       });
 
     // =====================================
@@ -866,11 +761,8 @@
             Number.isSafeInteger(target) &&
             target > 0
           ) {
-
             eventTargetInput.value = savedTarget;
-
           }
-
         }
 
       } catch (error) {
@@ -879,9 +771,7 @@
           "Gagal membaca target event:",
           error
         );
-
       }
-
     }
 
     // =====================================
@@ -904,7 +794,6 @@
           "Silakan login untuk melihat inventory.";
 
         return;
-
       }
 
       const { data, error } = await supabaseClient
@@ -927,7 +816,6 @@
         inventoryStatus.textContent = error.message;
 
         return;
-
       }
 
       inventoryList.innerHTML = "";
@@ -941,6 +829,7 @@
       // Reset stok event sebelum membaca data terbaru
 
       eventInventory = {
+        cornBlock: 0,
         corn: 0,
         turkey: 0,
         hat: 0
@@ -960,40 +849,35 @@
         const quantity =
           Number(item.quantity);
 
-        // Hubungkan inventory dengan Event Progress
+        // Baca stok event secara terpisah
+
+        if (normalizedName === "corn block") {
+          eventInventory.cornBlock = quantity;
+        }
 
         if (normalizedName === "corn") {
-
           eventInventory.corn = quantity;
-
         }
 
         if (normalizedName === "turkey") {
-
           eventInventory.turkey = quantity;
-
         }
 
         if (normalizedName === "pilgrim hat") {
-
           eventInventory.hat = quantity;
-
         }
 
         // Inventory card
 
         const card = document.createElement("div");
-
         card.className = "inventory-item";
 
         const details = document.createElement("div");
 
         const title = document.createElement("strong");
-
         title.textContent = name;
 
         const subtitle = document.createElement("small");
-
         subtitle.textContent = category;
 
         details.append(title, subtitle);
@@ -1001,22 +885,16 @@
         const quantityElement =
           document.createElement("div");
 
-        quantityElement.className =
-          "inventory-quantity";
-
-        quantityElement.textContent =
-          formatNumber(quantity);
+        quantityElement.className = "inventory-quantity";
+        quantityElement.textContent = formatNumber(quantity);
 
         card.append(details, quantityElement);
-
         inventoryList.appendChild(card);
 
         // Transaction item selector
 
         const option = document.createElement("option");
-
         option.value = item.item_id;
-
         option.textContent = name;
 
         inventorySelect.appendChild(option);
@@ -1027,24 +905,20 @@
           document.createElement("option");
 
         filterOption.value = item.item_id;
-
         filterOption.textContent = name;
 
         historyItemFilter.appendChild(filterOption);
-
       });
 
       if (data.length === 0) {
 
         inventoryList.textContent =
           "Inventory masih kosong.";
-
       }
 
-      // Perbarui Event Progress setelah inventory dimuat
+      // Perbarui Thanksgiving Progress otomatis
 
       updateEventProgress();
-
     }
 
     // =====================================
@@ -1069,7 +943,6 @@
           "Silakan login untuk melihat riwayat.";
 
         return;
-
       }
 
       let query = supabaseClient
@@ -1092,28 +965,15 @@
         })
         .limit(50);
 
-      const selectedItem =
-        historyItemFilter.value;
-
-      const selectedType =
-        historyTypeFilter.value;
+      const selectedItem = historyItemFilter.value;
+      const selectedType = historyTypeFilter.value;
 
       if (selectedItem) {
-
-        query = query.eq(
-          "item_id",
-          selectedItem
-        );
-
+        query = query.eq("item_id", selectedItem);
       }
 
       if (selectedType) {
-
-        query = query.eq(
-          "transaction_type",
-          selectedType
-        );
-
+        query = query.eq("transaction_type", selectedType);
       }
 
       const { data, error } = await query;
@@ -1125,7 +985,6 @@
           error.message;
 
         return;
-
       }
 
       historyList.innerHTML = "";
@@ -1136,7 +995,6 @@
           "Belum ada transaksi yang sesuai filter.";
 
         return;
-
       }
 
       historyStatus.textContent =
@@ -1146,190 +1004,108 @@
       data.forEach((transaction) => {
 
         const itemName =
-          transaction.items?.name ||
-          "Item tidak dikenal";
+          transaction.items?.name || "Item tidak dikenal";
 
         const category =
           transaction.items?.category || "-";
 
-        const type =
-          transaction.transaction_type;
+        const type = transaction.transaction_type;
+        const quantity = Number(transaction.quantity);
+        const balance = Number(transaction.balance_after);
 
-        const quantity =
-          Number(transaction.quantity);
-
-        const balance =
-          Number(transaction.balance_after);
-
-        const card =
-          document.createElement("div");
-
+        const card = document.createElement("div");
         card.className = "history-card";
 
         // Header
 
-        const top =
-          document.createElement("div");
-
+        const top = document.createElement("div");
         top.className = "history-top";
 
-        const itemDetails =
-          document.createElement("div");
+        const itemDetails = document.createElement("div");
 
-        const itemTitle =
-          document.createElement("div");
-
+        const itemTitle = document.createElement("div");
         itemTitle.className = "history-item-name";
-
         itemTitle.textContent = itemName;
 
-        const itemCategory =
-          document.createElement("div");
-
+        const itemCategory = document.createElement("div");
         itemCategory.className = "history-category";
-
         itemCategory.textContent = category;
 
-        itemDetails.append(
-          itemTitle,
-          itemCategory
-        );
+        itemDetails.append(itemTitle, itemCategory);
 
-        const badge =
-          document.createElement("span");
-
+        const badge = document.createElement("span");
         badge.className = "history-badge";
 
         if (type === "add") {
-
           badge.classList.add("badge-add");
-
           badge.textContent = "ADD";
-
         } else if (type === "remove") {
-
           badge.classList.add("badge-remove");
-
           badge.textContent = "REMOVE";
-
         } else {
-
           badge.classList.add("badge-adjust");
-
           badge.textContent = "ADJUST";
-
         }
 
         top.append(itemDetails, badge);
 
         // Transaction details
 
-        const details =
-          document.createElement("div");
-
+        const details = document.createElement("div");
         details.className = "history-details";
 
-        const changeBox =
-          document.createElement("div");
-
+        const changeBox = document.createElement("div");
         changeBox.className = "history-detail";
 
-        const changeLabel =
-          document.createElement("small");
-
+        const changeLabel = document.createElement("small");
         changeLabel.textContent =
-          type === "adjust"
-            ? "Selisih koreksi"
-            : "Perubahan stok";
+          type === "adjust" ? "Selisih koreksi" : "Perubahan stok";
 
-        const changeValue =
-          document.createElement("strong");
+        const changeValue = document.createElement("strong");
 
         if (type === "add") {
-
-          changeValue.textContent =
-            "+" + formatNumber(quantity);
-
+          changeValue.textContent = "+" + formatNumber(quantity);
         } else if (type === "remove") {
-
-          changeValue.textContent =
-            "-" + formatNumber(quantity);
-
+          changeValue.textContent = "-" + formatNumber(quantity);
         } else {
-
-          changeValue.textContent =
-            "±" + formatNumber(quantity);
-
+          changeValue.textContent = "±" + formatNumber(quantity);
         }
 
-        changeBox.append(
-          changeLabel,
-          changeValue
-        );
+        changeBox.append(changeLabel, changeValue);
 
-        const balanceBox =
-          document.createElement("div");
-
+        const balanceBox = document.createElement("div");
         balanceBox.className = "history-detail";
 
-        const balanceLabel =
-          document.createElement("small");
+        const balanceLabel = document.createElement("small");
+        balanceLabel.textContent = "Saldo akhir";
 
-        balanceLabel.textContent =
-          "Saldo akhir";
+        const balanceValue = document.createElement("strong");
+        balanceValue.textContent = formatNumber(balance);
 
-        const balanceValue =
-          document.createElement("strong");
-
-        balanceValue.textContent =
-          formatNumber(balance);
-
-        balanceBox.append(
-          balanceLabel,
-          balanceValue
-        );
-
-        details.append(
-          changeBox,
-          balanceBox
-        );
+        balanceBox.append(balanceLabel, balanceValue);
+        details.append(changeBox, balanceBox);
 
         // Date
 
-        const date =
-          document.createElement("div");
-
+        const date = document.createElement("div");
         date.className = "history-date";
+        date.textContent = formatDate(transaction.created_at);
 
-        date.textContent =
-          formatDate(transaction.created_at);
+        card.append(top, details, date);
 
         // Notes
 
-        card.append(
-          top,
-          details,
-          date
-        );
-
         if (transaction.notes) {
 
-          const notes =
-            document.createElement("div");
-
+          const notes = document.createElement("div");
           notes.className = "history-notes";
-
-          notes.textContent =
-            "Catatan: " + transaction.notes;
+          notes.textContent = "Catatan: " + transaction.notes;
 
           card.appendChild(notes);
-
         }
 
         historyList.appendChild(card);
-
       });
-
     }
 
     // =====================================
@@ -1350,27 +1126,15 @@
         );
 
         return;
-
       }
 
-      loginSection.classList.toggle(
-        "hidden",
-        !!session
-      );
-
-      trackerSection.classList.toggle(
-        "hidden",
-        !session
-      );
+      loginSection.classList.toggle("hidden", !!session);
+      trackerSection.classList.toggle("hidden", !session);
 
       if (session) {
-
         await loadInventory();
-
         await loadTransactionHistory();
-
       }
-
     }
 
     // =====================================
@@ -1393,7 +1157,6 @@
           );
 
           return;
-
         }
 
         showStatus("Sedang login...");
@@ -1406,18 +1169,12 @@
 
         if (error) {
 
-          showStatus(
-            "Login gagal: " + error.message
-          );
-
+          showStatus("Login gagal: " + error.message);
           return;
-
         }
 
         showStatus("Login berhasil.");
-
         await updateScreen();
-
       });
 
     // =====================================
@@ -1432,18 +1189,12 @@
 
         if (error) {
 
-          showStatus(
-            "Logout gagal: " + error.message
-          );
-
+          showStatus("Logout gagal: " + error.message);
           return;
-
         }
 
         showStatus("Kamu sudah logout.");
-
         await updateScreen();
-
       });
 
     // =====================================
@@ -1462,10 +1213,7 @@
 
         const scale = Math.min(
           1,
-          maxSide / Math.max(
-            bitmap.width,
-            bitmap.height
-          )
+          maxSide / Math.max(bitmap.width, bitmap.height)
         );
 
         const canvas = document.createElement("canvas");
@@ -1483,11 +1231,7 @@
         const context = canvas.getContext("2d");
 
         if (!context) {
-
-          throw new Error(
-            "Gagal memproses gambar."
-          );
-
+          throw new Error("Gagal memproses gambar.");
         }
 
         context.drawImage(
@@ -1499,7 +1243,6 @@
         );
 
         bitmap.close();
-
         bitmap = null;
 
         return await new Promise((resolve, reject) => {
@@ -1507,31 +1250,21 @@
           canvas.toBlob((blob) => {
 
             if (!blob) {
-
-              reject(
-                new Error("Gagal mengompres gambar.")
-              );
-
+              reject(new Error("Gagal mengompres gambar."));
               return;
-
             }
 
             resolve(blob);
 
           }, "image/jpeg", 0.75);
-
         });
 
       } finally {
 
         if (bitmap) {
-
           bitmap.close();
-
         }
-
       }
-
     }
 
     // =====================================
@@ -1549,12 +1282,8 @@
 
         if (!file) {
 
-          showStatus(
-            "Pilih screenshot terlebih dahulu."
-          );
-
+          showStatus("Pilih screenshot terlebih dahulu.");
           return;
-
         }
 
         const allowedTypes = [
@@ -1565,22 +1294,14 @@
 
         if (!allowedTypes.includes(file.type)) {
 
-          showStatus(
-            "Format gambar harus JPG, PNG, atau WEBP."
-          );
-
+          showStatus("Format gambar harus JPG, PNG, atau WEBP.");
           return;
-
         }
 
         if (file.size > 4.8 * 1024 * 1024) {
 
-          showStatus(
-            "Ukuran gambar terlalu besar. Maksimal 4,8 MB."
-          );
-
+          showStatus("Ukuran gambar terlalu besar. Maksimal 4,8 MB.");
           return;
-
         }
 
         button.disabled = true;
@@ -1593,27 +1314,19 @@
           } = await supabaseClient.auth.getSession();
 
           if (sessionError || !session) {
-
             throw new Error(
               "Sesi login berakhir. Silakan login kembali."
             );
-
           }
 
-          showStatus(
-            "1/4 - Mengompres screenshot..."
-          );
+          showStatus("1/4 - Mengompres screenshot...");
 
-          const imageBlob =
-            await compressImage(file);
+          const imageBlob = await compressImage(file);
 
           const filePath =
-            session.user.id + "/" +
-            Date.now() + ".jpg";
+            session.user.id + "/" + Date.now() + ".jpg";
 
-          showStatus(
-            "2/4 - Mengunggah screenshot ke Storage..."
-          );
+          showStatus("2/4 - Mengunggah screenshot ke Storage...");
 
           const { error: uploadError } =
             await supabaseClient.storage
@@ -1624,17 +1337,12 @@
               });
 
           if (uploadError) {
-
             throw new Error(
-              "Upload Storage gagal: " +
-              uploadError.message
+              "Upload Storage gagal: " + uploadError.message
             );
-
           }
 
-          showStatus(
-            "3/4 - Membuat Signed URL..."
-          );
+          showStatus("3/4 - Membuat Signed URL...");
 
           const {
             data: signedData,
@@ -1644,18 +1352,13 @@
             .createSignedUrl(filePath, 3600);
 
           if (signedError || !signedData?.signedUrl) {
-
             throw new Error(
               "Gagal membuat Signed URL: " +
-              (signedError?.message ||
-               "URL tidak tersedia.")
+              (signedError?.message || "URL tidak tersedia.")
             );
-
           }
 
-          showStatus(
-            "4/4 - Mengirim URL gambar ke Make..."
-          );
+          showStatus("4/4 - Mengirim URL gambar ke Make...");
 
           const { data, error } =
             await supabaseClient.functions.invoke(
@@ -1686,30 +1389,42 @@
                   response.error ||
                   response.message ||
                   JSON.stringify(response);
-
               }
 
             } catch (_) {}
 
             throw new Error(detail);
-
           }
 
           if (!data || !data.success) {
-
-            throw new Error(
-              data?.error || "Proses gagal."
-            );
-
+            throw new Error(data?.error || "Proses gagal.");
           }
+
+          showStatus(
+            "Screenshot berhasil dikirim!\n\n" +
+            "Nama file: " + file.name + "\n" +
+            "Lokasi Storage: " + filePath + "\n\n" +
+            "Status: " +
+            (data.message || "Dikirim ke Make.") +
+            "\n\nMemperbarui inventory..."
+          );
+
+          // AUTO REFRESH SETELAH SCREENSHOT DIPROSES
+          // Make harus sudah menyimpan hasilnya ke Supabase.
+
+          await loadInventory();
+          await loadTransactionHistory();
 
           showStatus(
             "SCREENSHOT BERHASIL DIKIRIM!\n\n" +
             "Nama file: " + file.name + "\n" +
-            "Lokasi Storage: " + filePath + "\n\n" +
             "Status: " +
-            (data.message || "Dikirim ke Make.")
+            (data.message || "Dikirim ke Make.") +
+            "\n\nInventory dan Thanksgiving Progress sudah dimuat ulang.\n" +
+            "Jika Make masih memproses data, tekan Refresh Inventory setelah proses selesai."
           );
+
+          document.getElementById("screenshot").value = "";
 
         } catch (error) {
 
@@ -1723,9 +1438,7 @@
         } finally {
 
           button.disabled = false;
-
         }
-
       });
 
     // =====================================
@@ -1734,9 +1447,7 @@
 
     document.getElementById("refreshInventory")
       .addEventListener("click", async () => {
-
         await loadInventory();
-
       });
 
     // =====================================
@@ -1744,10 +1455,7 @@
     // =====================================
 
     document.getElementById("refreshHistory")
-      .addEventListener(
-        "click",
-        loadTransactionHistory
-      );
+      .addEventListener("click", loadTransactionHistory);
 
     // =====================================
     // HISTORY FILTERS
@@ -1791,7 +1499,6 @@
             "Pilih item terlebih dahulu.";
 
           return;
-
         }
 
         if (quantityInput === "") {
@@ -1800,7 +1507,6 @@
             "Masukkan jumlah transaksi.";
 
           return;
-
         }
 
         const quantity = Number(quantityInput);
@@ -1814,7 +1520,6 @@
             "Jumlah harus berupa bilangan bulat yang valid.";
 
           return;
-
         }
 
         if (
@@ -1826,7 +1531,6 @@
             "Jumlah Add dan Remove harus lebih dari 0.";
 
           return;
-
         }
 
         const confirmed = confirm(
@@ -1834,9 +1538,7 @@
         );
 
         if (!confirmed) {
-
           return;
-
         }
 
         button.disabled = true;
@@ -1858,9 +1560,7 @@
             );
 
           if (error) {
-
             throw error;
-
           }
 
           inventoryStatus.textContent =
@@ -1880,12 +1580,9 @@
             "transactionNotes"
           ).value = "";
 
-          // Refresh inventory dan event progress
+          // Refresh inventory, event progress, dan history.
 
           await loadInventory();
-
-          // Refresh transaction history
-
           await loadTransactionHistory();
 
         } catch (error) {
@@ -1902,9 +1599,7 @@
         } finally {
 
           button.disabled = false;
-
         }
-
       });
 
     // =====================================
@@ -1912,9 +1607,7 @@
     // =====================================
 
     loadSavedEventTarget();
-
     updateEventProgress();
-
     updateScreen();
 
   </script>
